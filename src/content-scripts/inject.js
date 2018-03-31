@@ -120,7 +120,8 @@ chrome.extension.sendMessage({}, function(response) {
             'update called'
         )
         var tweets = document.querySelectorAll('div.tweet');
-        addUserScoreToTweets(tweets)
+        addFishyDomToTweets(tweets)
+        // addUserScoreToTweets(tweets)
       }
 
       /**
@@ -209,6 +210,23 @@ chrome.extension.sendMessage({}, function(response) {
   	}
 	}, 10);
 });
+
+/**
+ *
+ * @param tweets - Array<HTMLElement>
+ */
+function addFishyDomToTweets(tweets) {
+    for (const tweet of tweets){
+        addFishyDomToTweet(tweet)
+    }
+}
+/**
+ *
+ * @param tweet - HTMLElement
+ */
+function addFishyDomToTweet(tweet) {
+
+}
 
 /**
  *
