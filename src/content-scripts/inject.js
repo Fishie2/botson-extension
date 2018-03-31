@@ -121,7 +121,9 @@ chrome.extension.sendMessage({}, function(response) {
         )
         var tweets = document.querySelectorAll('div.tweet');
         addFishyDomToTweets(tweets)
-        // addUserScoreToTweets(tweets)
+        addUserScoreToTweets(tweets) /* <<<
+         an old function from the base botson chrome extension . . .
+          we'll keep it for now bc it updates the top right chrome extension menu */
       }
 
       /**
@@ -225,6 +227,39 @@ function addFishyDomToTweets(tweets) {
  * @param tweet - HTMLElement
  */
 function addFishyDomToTweet(tweet) {
+    const tweetText = getTextFromTweet(tweet)
+    const link = getLinkFromTweet(tweet)
+    const userId = getUserIdFromTweet(tweet)
+    getFishyOverlay(userId, tweetText, link).then(fishyOverlayDom => {
+        getFishyButton(userId, tweetText, link).then(fishyButtonDom => {
+            addClickableFishyActionToTweet(tweet, fishyButtonDom, fishyOverlayDom)
+        })
+    })
+}
+
+/**
+ *
+ * @param tweet
+ * @returns the textContent of the tweet as a String. does not return the link
+ */
+function getTextFromTweet(tweet){
+
+}
+
+/**
+ *
+ * @param tweet
+ * @returns the link of the tweet as a String
+ */
+function getLinkFromTweet(tweet){
+
+}
+/**
+ *
+ * @param tweet
+ * @returns the userId of the tweet as a String
+ */
+function getUserIdFromTweet(tweet){
 
 }
 
@@ -309,13 +344,13 @@ function createLinkSection(tweetText){
  *
  * // TODO: this might have different params
  * @param userId
- * @param text
+ * @param tweetText
  * @param link
  *
  * @returns buttonDOM - Promise<HTMLElement>
  *
  */
-function getFishyButton(userId, text, link){
+function getFishyButton(userId, tweetText, link){
     // TODO: change color of button based on how fucked up the tweet is
     return new Promise((resolve, reject) => {
         const button = document.createElement('button')
@@ -332,10 +367,23 @@ function getFishyButton(userId, text, link){
  * @param button- HTMLElement
  * @param overlay- HTMLElement
  */
-function addFishyToTweet(tweet, button, overlay){
+function addClickableFishyActionToTweet(tweet, button, overlay){
     const actionList = tweet.querySelector('.ProfileTweet-actionList')
+    /** remove previously made (if it exists) action to tweet */
+    /*
+    this function may have previously been called for this tweet
+    meaning the fishy action dom may already exist . . .
+    if that is the case we should delete the current fishy dom . . so that we don't get w+ icons at the button action menu
+    */
+    const TWITTER_ACTION_CLASS = 'ProfileTweet-action'
+    const FISHY_ACTION_CLASS = TWITTER_ACTION_CLASS + '--fishy'
+    const previouslyMadeFishyActionDom = tweet.querySelector('.' + FISHY_ACTION_CLASS)
+    tweet.removeChild(previouslyMadeFishyActionDom)
+
+    /** add FishyAction to tweet */
     const fishyActionDom = document.createElement('div')
-    fishyActionDom.setAttribute('class', 'ProfileTweet-action ProfileTweet-action--fishy')
+    fishyActionDom.classList.add(TWITTER_ACTION_CLASS)
+    fishyActionDom.classList.add(FISHY_ACTION_CLASS)
     fishyActionDom.appendChild(button)
     // TODO: somehow make onclick on button display the overlay
     actionList.appendChild(fishyActionDom)
