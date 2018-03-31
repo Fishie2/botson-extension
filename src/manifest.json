@@ -1,10 +1,9 @@
 {
-  "name": "Botson",
-  "short_name": "Botson",
-  "version": "0.2.1",
+  "name": "Fishie",
+  "short_name": "Fishe",
+  "version": "0.1",
   "manifest_version": 2,
-  "description": "Detect twitter bots in your newsfeed",
-  "homepage_url": "http://botson.net/",
+  "description": "Tools to fight the disinformation overload on social media.",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
@@ -12,7 +11,7 @@
   },
   "browser_action": {
     "default_icon": "icons/icon48.png",
-    "default_title": "Botson",
+    "default_title": "Fishie",
     "default_popup": "popup/popup.html"
   },
   "background": {
