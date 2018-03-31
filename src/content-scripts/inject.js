@@ -210,5 +210,115 @@ chrome.extension.sendMessage({}, function(response) {
 	}, 10);
 });
 
+/**
+ *
+ * @param userId - string
+ * @param tweetText - string
+ * @param link - string
+ *
+ * @returns overlayDOM - Promise<HTMLElement>
+ *
+ */
+function getFishyOverlay(userId, tweetText, link){
+    return new Promise((resolve, reject) => {
+        const overlayDom = document.createElement('div')
+        createUserSection(userId).then(userSection => {
+            overlayDom.appendChild(userSection)
+            createHighlightedTweetSection(tweetText).then(tweetSection => {
+                overlayDom.appendChild(tweetSection)
+                createLinkSection(link).then(linkSection => {
+                    overlayDom.appendChild(linkSection)
+                    resolve(overlayDom)
+                })
+            })
+        })
+    })
+}
+
+/**
+ *
+ * @param userId
+ * @returns userSectionDom - Promise<HTMLElement>
+ */
+function createUserSection(userId){
+  // TODO: replace this with dynamically created HTML
+
+    // sample hardcoded string
+    const section = document.createElement('div');
+    const sampleText = document.createTextNode('This user is 50% chance a bot yo')
+    section.appendChild(sampleText)
+    return new Promise((resolve, reject) => {
+      resolve(section)
+    })
+}
+
+/**
+ * @param tweetText - string
+ * @returns element - Promise<HTMLElement>
+        - this html element underlines certain sections of the data with between 0 and 3 colors. Each underline color represents one of the Perspective Api categories.
+ */
+function createHighlightedTweetSection(tweetText){
+    // TODO: replace this with dynamically created HTML
+
+    // sample hardcoded string
+    const section = document.createElement('div');
+    const sampleText = document.createTextNode('Some html with highlighted tweet should go here')
+    section.appendChild(sampleText)
+    return new Promise((resolve, reject) => {
+        resolve(section)
+    })
+}
+/**
+* @param link - string - e.g.  "http://breitbart.com/somefakearticle123.html"
+* This function calls the OpenSources API to classify the link
+*   >>> It really might actually just call some json file with the classification, meaning we technically don't have to return a promise . . . Just let me know if it is a promise or not. Currently I (John) am coding it as if it is a promise
+* @returns element - Promise<HTMLElement>
+        - this html element has text that classifies the type of news source.
+**/
+function createLinkSection(tweetText){
+    // TODO: replace this with dynamically created HTML
+
+    // sample hardcoded string
+    const section = document.createElement('div');
+    const sampleText = document.createTextNode('some shit about how reliable the link is ')
+    section.appendChild(sampleText)
+    return new Promise((resolve, reject) => {
+        resolve(section)
+    })
+}
+
+/**
+ *
+ * // TODO: this might have different params
+ * @param userId
+ * @param text
+ * @param link
+ *
+ * @returns buttonDOM - Promise<HTMLElement>
+ *
+ */
+function getFishyButton(userId, text, link){
+    // TODO: change color of button based on how fucked up the tweet is
+    return new Promise((resolve, reject) => {
+        const button = document.createElement('button')
+        const textElement = 'Fishy Stats'
+        button.appendChild(textElement)
+        resolve(button)
+    })
+}
 
 
+/**
+ *
+ * @param tweet - HTMLElement
+ * @param button- HTMLElement
+ * @param overlay- HTMLElement
+ */
+function addFishyToTweet(tweet, button, overlay){
+    const actionList = tweet.querySelector('.ProfileTweet-actionList')
+    const fishyActionDom = document.createElement('div')
+    fishyActionDom.setAttribute('class', 'ProfileTweet-action ProfileTweet-action--fishy')
+    fishyActionDom.appendChild(button)
+    // TODO: somehow make onclick on button display the overlay
+    actionList.appendChild(fishyActionDom)
+}
