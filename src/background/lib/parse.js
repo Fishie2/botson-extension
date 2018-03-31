@@ -11,7 +11,7 @@ var url = "https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=
 * @return HTMLRet - The full HTML of the response, with a leading term from category.
 */
 function parseThroughPerspective(message){
-    var queryPromise = new Promise(function (resolve, reject){
+     let queryPromise = new Promise(function (resolve, reject){
         /*
             Perspective API Section
         */
@@ -67,17 +67,15 @@ function isFlaggedSource(link) {
         let splitArr = hostname.split('.');
         arrLen = splitArr.length;
         if(arrLen > 2){
-            hostName = splitArr[arr-2]+'.'+splitArr[arrLen-1];
+            hostName = splitArr[arrLen-2]+'.'+splitArr[arrLen-1];
             if(splitArr[arrLen-2].length == 2 && splitArr[arrLen-1].length == 2) {
                 hostName = splitArr[arrLen-3]+'.'+domain;
             }
         }
-        
-        }
-    
         return new Promise(function(resolve, reject){
             $.getJSON("https://raw.githubusercontent.com/BigMcLargeHuge/opensources/master/sources/sources.json", function(data){
-                if(typeof data[hostname] !== undefined){
+                console.log(data);
+                if(typeof data[hostname] === undefined){
                     let div = document.createElement("div");
                     div.classList.add("fishie-link");
                     let span = document.createElement("span");
@@ -85,7 +83,7 @@ function isFlaggedSource(link) {
                     span.innerHTML = "This link is classified as: ";
                     
                     let type = document.createElement("b");
-                    type.innerHTML = data['hostname'].type;
+                    type.innerHTML = data[hostname].type;
                     span.appendChild(type);
                     
                     if(data[hostname]['2nd type'] !== ""){
@@ -108,8 +106,48 @@ function isFlaggedSource(link) {
                     resolve(null);    
                 }
             });
+        });
+    
+    
+    
+}
+/**
+ *
+ * @param userId
+ * @returns userSectionDom - Promise<HTMLElement>
+*  calls the bot detection API, gets the bot percent chance (between 0 and 100), and creates appropriate dom based on that
+ */
+function createUserSection(userId){
+  // TODO: replace this with dynamically created HTML
+    let querryPromise = new Promise(function(resolve, reject){
+        /*
+            Perspective API Section
+        */
+        //Build Request
+        var xhr = new XMLHttpRequest();   // new HttpRequest instance 
+        xhr.open("POST", 'https://osome-botometer.p.mashape.com/2/check_account', true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+	xhr.setRequesetHeader("X-Mashape-Key", "qSr2wEQKT0msh2lR0PclFOpe55l0p1tEGb2jsnAAOX5lGrFWa3");
+	xhr.setRequestHeader("Accept","application/json");
+        xhr.onload = (response) => {
+            var myData = JSON.parse(response.target.response);
+	    console.log(myData);
+            resolve(myData)
         }
-    
-    
-    
+        xhr.onerror = reject;
+
+        //Generate Request for Perspective API
+        var request = {userId: userId};
+        request = JSON.stringify(request);
+        xhr.send(request);        
+    });
+    return querryPromise.then(function(ret){
+        let section = document.createElement('div');
+	let sampleText = document.createTextNode('' + ret);
+	section.appendChild(section);
+
+    });
+                                    
+ 
+
 }
