@@ -72,38 +72,37 @@ function isFlaggedSource(link) {
                 hostName = splitArr[arrLen-3]+'.'+domain;
             }
         }
+        console.log(hostname);
         return new Promise(function(resolve, reject){
             $.getJSON("https://raw.githubusercontent.com/BigMcLargeHuge/opensources/master/sources/sources.json", function(data){
-                console.log(data);
                 if(typeof data[hostname] === undefined){
-                    let div = document.createElement("div");
+                    resolve(null);
+                    
+                        
+                }
+                else{
+                      let div = document.createElement("div");
                     div.classList.add("fishie-link");
                     let span = document.createElement("span");
                     span.classList.add("fishie-link-classification-container");
                     span.innerHTML = "This link is classified as: ";
-                    
+                    div.appendChild(span);
                     let type = document.createElement("b");
                     type.innerHTML = data[hostname].type;
                     span.appendChild(type);
                     
                     if(data[hostname]['2nd type'] !== ""){
-                        type = type.copyNode();
-                        type.innerHTML = data['hostname']['2nd type'];
+                        type = type.cloneNode();
+                        type.innerHTML = data[hostname]['2nd type'];
                         span.appendChild(type);
                     }
                     
                     if(data[hostname]['3rd type'] !== ""){
-                        type = type.copyNode();
-                        type.innerHTML = data['hostname']['3rd type'];
+                        type = type.cloneNode();
+                        type.innerHTML = data[hostname]['3rd type'];
                         span.appendChild(type);
                     }
-                    
-                    
-                    resolve(div);
-                        
-                }
-                else{
-                    resolve(null);    
+                    resolve(div);  
                 }
             });
         });
@@ -117,37 +116,51 @@ function isFlaggedSource(link) {
  * @returns userSectionDom - Promise<HTMLElement>
 *  calls the bot detection API, gets the bot percent chance (between 0 and 100), and creates appropriate dom based on that
  */
-function createUserSection(userId){
+function createUserSection(userId,screen_name){
+    /*
   // TODO: replace this with dynamically created HTML
     let querryPromise = new Promise(function(resolve, reject){
         /*
             Perspective API Section
-        */
+        
         //Build Request
-        var xhr = new XMLHttpRequest();   // new HttpRequest instance 
-        xhr.open("POST", 'https://osome-botometer.p.mashape.com/2/check_account', true);
-        xhr.setRequestHeader("Content-Type", "application/json");
-	xhr.setRequesetHeader("X-Mashape-Key", "qSr2wEQKT0msh2lR0PclFOpe55l0p1tEGb2jsnAAOX5lGrFWa3");
-	xhr.setRequestHeader("Accept","application/json");
-        xhr.onload = (response) => {
-            var myData = JSON.parse(response.target.response);
-	    console.log(myData);
-            resolve(myData)
-        }
-        xhr.onerror = reject;
-
-        //Generate Request for Perspective API
-        var request = {userId: userId};
-        request = JSON.stringify(request);
-        xhr.send(request);        
+        Twitter.isLoggedIn(function(auth) {
+            if (auth.oauth_token && auth.oauth_token_secret) {
+                var xhttp = new XMLHttpRequest();
+                xhttp.open('POST', 'https://askbotson.herokuapp.com/api/', true);
+                xhttp.setRequestHeader("Content-Type", "application/json");
+                xhttp.setRequestHeader("x-twitter-oauth-token", auth.oauth_token);
+                xhttp.setRequestHeader("x-twitter-oauth-secret", auth.oauth_token_secret);
+                if (auth.user_id) xhttp.setRequestHeader("x-twitter-user-id",userId);
+                let user = {};
+                user[userId] = screen_name;
+                xhttp.onload = (response)=>{
+                    resolve(response.target.response);    
+                }
+                xhttp.onerror = reject;
+                xhttp.send(JSON.stringify(user)); 
+            } 
+           
+            
+  else {
+    return Twitter.authenticate();
+  }
+});     
     });
     return querryPromise.then(function(ret){
         let section = document.createElement('div');
-	let sampleText = document.createTextNode('' + ret);
-	section.appendChild(section);
+        console.log(ret);
+	   let sampleText = document.createTextNode('' + ret);
+        section.appendChild(section);
 
-    });
+        });*/
                                     
- 
+    const section = document.createElement('div');
+    let chance = Math.floor(Math.random()*100);
+    const sampleText = document.createTextNode('This user is ' + chance + '% chance a bot yo')
+    section.appendChild(sampleText)
+    return new Promise((resolve, reject) => {
+      resolve(section)
+    })
 
 }
