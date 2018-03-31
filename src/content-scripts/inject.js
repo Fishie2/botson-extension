@@ -120,23 +120,27 @@ chrome.extension.sendMessage({}, function(response) {
             'update called'
         )
         var tweets = document.querySelectorAll('div.tweet');
-        addFishyDomToTweets(tweets)
-        addUserScoreToTweets(tweets) /* <<<
-         an old function from the base botson chrome extension . . .
-          we'll keep it for now bc it updates the top right chrome extension menu */
+        updateUI(tweets)
       }
 
       /**
        * Update dom UI.
        */
 
-      function updateUI(threshold) {
+      function updateUI(tweets, threshold) {
         console.log("updateUI called", threshold)
         threshold = threshold || 0.6;
-        var tweets = document.querySelectorAll('div.tweet');
-        for (var i = 0; i < tweets.length; i++) {
-          toggleTweetUI(tweets[i], threshold);
-        }
+        addFishyDomToTweets(tweets)
+        addUserScoreToTweets(tweets) /* <<<
+     an old function from the base botson chrome extension . . .
+      we'll keep it for now bc it updates the top right chrome extension menu */
+
+
+          // OLD LOGIC BELOW
+        // var tweets = document.querySelectorAll('div.tweet');
+        // for (var i = 0; i < tweets.length; i++) {
+        //   toggleTweetUI(tweets[i], threshold);
+        // }
       }
 
       /**
