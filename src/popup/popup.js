@@ -1,4 +1,4 @@
-
+console.log('popup.js called ')
 /**
  * Show range editor.
  */
@@ -20,6 +20,7 @@ document.querySelector('a.hide-range').addEventListener('click', function(e) {
  */
 
 chrome.storage.local.get(['threshold'], function(items) {
+  console.log('chrome storage get threshold called', items)
   if (!items.threshold) return;
   document.querySelector('.range').value = items.threshold;
   document.querySelectorAll('.range-value').forEach(function(el) {
@@ -32,6 +33,7 @@ chrome.storage.local.get(['threshold'], function(items) {
  */
 
 chrome.storage.onChanged.addListener(function(changes, namespace) {
+  console.log('chrome storage onChanged called', changes, namespace)
   for (key in changes) if (key === 'threshold' && changes.threshold.newValue) updateUI();
 });
 
@@ -66,6 +68,7 @@ document.querySelector('.logout').addEventListener('click', function(e) {
  */
 
 Twitter.isLoggedIn(function(items) {
+  console.log('Twitter is logged in callback called', items)
   if (items.oauth_token && items.oauth_token_secret) {
     document.querySelector('.login').style.display = 'none';
     document.querySelector('.container').style.display = 'block';
@@ -80,14 +83,16 @@ Twitter.isLoggedIn(function(items) {
  */
 
 function updateUI() {
-  chrome.storage.local.get(null, function(items) {
-    var checked = calculateBotsAndAccounts(items);
-    document.querySelector('.accounts').innerText = getAccountText(checked.accounts);
-    document.querySelector('.bots').innerText = getBotText(checked.bots);
-    document.querySelectorAll('.range-value').forEach(function(el) {
-      el.innerText = Math.round(items.threshold * 100) + '%';
+    console.log('updateUI called')
+    chrome.storage.local.get(null, function(items) {
+        console.log('updateUI local storage get callback called', items)
+        var checked = calculateBotsAndAccounts(items);
+        document.querySelector('.accounts').innerText = getAccountText(checked.accounts);
+        document.querySelector('.bots').innerText = getBotText(checked.bots);
+        document.querySelectorAll('.range-value').forEach(function(el) {
+          el.innerText = Math.round(items.threshold * 100) + '%';
+        });
     });
-  });
 }
 
 /**
@@ -95,6 +100,7 @@ function updateUI() {
  */
 
 function calculateBotsAndAccounts(items) {
+  console.log('calculateBotsAndAccounts called')
   var accounts = Object.keys(items).length - 4;
   var bots = 0;
   for (userId in items) if (items[userId].score > items.threshold) bots++;
@@ -132,6 +138,7 @@ var analytics = new Analytics('aO23Wx83MZQnaPWyRvxffagdSm9I302w');
  */
 
 chrome.storage.local.get(['user_id'], function(items) {
+  console.log('chrome storage get user id called', items)
   analytics.track({
     userId: items.user_id,
     event: 'Icon Clicked'
