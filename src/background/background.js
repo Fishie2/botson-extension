@@ -4,6 +4,7 @@
  */
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  console.log('backgroundjs listener onMessage called')
   sendResponse({});
 
   var params = Twitter.deparam(request.session);
