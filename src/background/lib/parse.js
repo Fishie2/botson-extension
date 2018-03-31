@@ -52,15 +52,39 @@ function parseThroughPerspective(message){
             return div;
             
         },);
-
+}
+function isFlaggedSource(link) {
+        var hostname;
+        if(url.indexOf("://") > -1){
+            hostname = link.split('/')[2];
+        }
+        else{
+            hostname=url.split('/')[0];
+        }
+        //Find and remove port number
+        hostname = hostname.split(':')[0];
+        hostname = hostname.split('?')[0];
+        let splitArr = hostname.split('.');
+        arrLen = splitArr.length;
+        if(arrLen > 2){
+            hostName = splitArr[arr-2]+'.'+splitArr[arrLen-1];
+            if(splitArr[arrLen-2].length == 2 && splitArr[arrLen-1].length == 2) {
+                hostName = splitArr[arrLen-3]+'.'+domain;
+            }
+        }
+        
+        }
+    
+        return new Promise(function(resolve, reject){
+            $.getJSON("https://raw.githubusercontent.com/BigMcLargeHuge/opensources/master/sources/sources.json", function(data){
+                hasProperty = true;
+                if(typeof hasProperty['hostname'] === undefined){
+                    hasProperty = false;    
+                }
+                resolve(hasProperty);
+            });
+        }
     
     
     
-    /*
-        Botson Section
-    */
-    
-    /*
-        Skim Tweets and test on Opensources.co
-    */
 }
