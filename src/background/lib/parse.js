@@ -77,11 +77,36 @@ function isFlaggedSource(link) {
     
         return new Promise(function(resolve, reject){
             $.getJSON("https://raw.githubusercontent.com/BigMcLargeHuge/opensources/master/sources/sources.json", function(data){
-                hasProperty = true;
-                if(typeof hasProperty['hostname'] === undefined){
-                    hasProperty = false;    
+                if(typeof data[hostname] !== undefined){
+                    let div = document.createElement("div");
+                    div.classList.add("fishie-link");
+                    let span = document.createElement("span");
+                    span.classList.add("fishie-link-classification-container");
+                    span.innerHTML = "This link is classified as: ";
+                    
+                    let type = document.createElement("b");
+                    type.innerHTML = data['hostname'].type;
+                    span.appendChild(type);
+                    
+                    if(data[hostname]['2nd type'] !== ""){
+                        type = type.copyNode();
+                        type.innerHTML = data['hostname']['2nd type'];
+                        span.appendChild(type);
+                    }
+                    
+                    if(data[hostname]['3rd type'] !== ""){
+                        type = type.copyNode();
+                        type.innerHTML = data['hostname']['3rd type'];
+                        span.appendChild(type);
+                    }
+                    
+                    
+                    resolve(div);
+                        
                 }
-                resolve(hasProperty);
+                else{
+                    resolve(null);    
+                }
             });
         }
     
