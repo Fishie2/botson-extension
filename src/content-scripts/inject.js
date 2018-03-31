@@ -13,7 +13,7 @@ chrome.extension.sendMessage({}, function(response) {
         console.log('inject.js get oauth tokens called', items)
         if (!items.oauth_token || !items.oauth_token_secret) return;
         refresh(items);
-        setInterval(function() { return refresh(items) }, 5000);
+        setInterval(function() { return refresh(items) }, 6000000); // don't repeat the interval for like 6mil seconds lol.
       });
 
       /**
@@ -41,15 +41,9 @@ chrome.extension.sendMessage({}, function(response) {
        */
 
       function updateUI(tweets, threshold) {
-        console.log("updateUI called", threshold)
+        console.log("updateUI called", tweets, threshold)
         threshold = threshold || 0.6;
         addFishyDomToTweets(tweets)
-
-          // OLD LOGIC BELOW
-        // var tweets = document.querySelectorAll('div.tweet');
-        // for (var i = 0; i < tweets.length; i++) {
-        //   toggleTweetUI(tweets[i], threshold);
-        // }
       }
       /**
        * On slider change, then update UI.
@@ -67,6 +61,8 @@ chrome.extension.sendMessage({}, function(response) {
   	}
 	}, 10);
 });
+const TWEET_TEXT_CLASS = 'tweet-text'
+const TWEET_TEXT_SELECTOR = '.' + TWEET_TEXT_CLASS
 
 /**
  *
@@ -86,8 +82,10 @@ function addFishyDomToTweet(tweet) {
     const tweetText = getTextFromTweet(tweet)
     const link = getLinkFromTweet(tweet)
     const userId = getUserIdFromTweet(tweet)
+    console.log('addFishyDomToTweetCalled 1', tweet, tweetText, link, userId)
     getFishyOverlay(userId, tweetText, link).then(fishyOverlayDom => {
         getFishyButton(userId, tweetText, link).then(fishyButtonDom => {
+            console.log('addFishyDomToTweetCalled 1', tweet, fishyButtonDom, fishyOverlayDom, link, userId)
             addClickableFishyActionToTweet(tweet, fishyButtonDom, fishyOverlayDom)
         })
     })
@@ -97,18 +95,38 @@ function addFishyDomToTweet(tweet) {
  *
  * @param tweet
  * @returns the textContent of the tweet as a String. does not return the link
+ *  OR
+ *  @returns undefined if the tweet does not have the tweet text dom element
  */
 function getTextFromTweet(tweet){
-
+    const tweetTextDom = tweet.querySelector(TWEET_TEXT_SELECTOR)
+    if (!tweetTextDom) {
+        console.error('there is no tweettext for ', tweet)
+        return
+    }
+    const tweetText = tweetTextDom.textContent
+    return tweetText
 }
 
 /**
  *
  * @param tweet
  * @returns the link of the tweet as a String
+ *  OR
+ *  @returns undefined if the tweet has no link or no tweet text element
  */
 function getLinkFromTweet(tweet){
-
+    const tweetTextDom = tweet.querySelector(TWEET_TEXT_SELECTOR)
+    if (!tweetTextDom) {
+        console.error('getLinkfromtweet no tweetTextDom found for ', tweet)
+        return
+    }
+    const tweetTextDomLink = tweetTextDom.querySelector('a')
+    if (!tweetTextDomLink) {
+        return
+    }
+    const tweetLinkText = tweetTextDomLink.getAttribute('data-expanded-url')
+    return tweetLinkText
 }
 /**
  *
@@ -116,7 +134,8 @@ function getLinkFromTweet(tweet){
  * @returns the userId of the tweet as a String
  */
 function getUserIdFromTweet(tweet){
-
+    const dataUserId = tweet.getAttribute('data-user-id')
+    return dataUserId
 }
 
 /**
@@ -133,13 +152,21 @@ function getFishyOverlay(userId, tweetText, link){
         const overlayDom = document.createElement('div')
         createUserSection(userId).then(userSection => {
             overlayDom.appendChild(userSection)
-            createHighlightedTweetSection(tweetText).then(tweetSection => {
-                overlayDom.appendChild(tweetSection)
-                createLinkSection(link).then(linkSection => {
-                    overlayDom.appendChild(linkSection)
-                    resolve(overlayDom)
+            if (tweetText) {
+                createHighlightedTweetSection(tweetText).then(tweetSection => {
+                    overlayDom.appendChild(tweetSection)
+                    if (link) {
+                        createLinkSection(link).then(linkSection => {
+                            overlayDom.appendChild(linkSection)
+                            resolve(overlayDom)
+                        })
+                    } else {
+                        resolve(overlayDom)
+                    }
                 })
-            })
+            } else {
+                resolve(overlayDom)
+            }
         })
     })
 }
@@ -148,6 +175,7 @@ function getFishyOverlay(userId, tweetText, link){
  *
  * @param userId
  * @returns userSectionDom - Promise<HTMLElement>
+ *  calls the bot detection API, gets the bot percent chance (between 0 and 100), and creates appropriate dom based on that
  */
 function createUserSection(userId){
   // TODO: replace this with dynamically created HTML
@@ -210,8 +238,26 @@ function getFishyButton(userId, tweetText, link){
     // TODO: change color of button based on how fucked up the tweet is
     return new Promise((resolve, reject) => {
         const button = document.createElement('button')
-        const textElement = 'Fishy Stats'
-        button.appendChild(textElement)
+        /** add the classes that twitter has been adding on its buttons */
+        button.classList.add('ProfileTweet-actionButton')
+        button.classList.add('u-textUserColorHover')
+        button.classList.add('js-actionButton')
+        button.classList.add('js-actionShareViaDM')
+        const iconContainer = document.createElement('div')
+        iconContainer.classList.add('IconContainer') // = document.createElement('div')
+        iconContainer.classList.add('js-tooltip') // = document.createElement('div')
+        const iconSpan = document.createElement('span')
+        // iconSpan.classList.add('Icon')
+        // iconSpan.classList.add('Icon--medium')
+        // iconSpan.classList.add('Icon--discover')
+        // const button = document.createElement('button')
+        iconSpan.classList.add('Icon')
+        iconSpan.classList.add('Icon--medium')
+        iconSpan.classList.add('Icon--fishy')
+        iconContainer.appendChild(iconSpan)
+        button.appendChild(iconContainer)
+        // const textElement = document.createTextNode('Fishy Stats')
+        // button.appendChild(textElement)
         resolve(button)
     })
 }
@@ -224,23 +270,33 @@ function getFishyButton(userId, tweetText, link){
  * @param overlay- HTMLElement
  */
 function addClickableFishyActionToTweet(tweet, button, overlay){
-    const actionList = tweet.querySelector('.ProfileTweet-actionList')
+    const ACTION_LIST_CLASS = 'ProfileTweet-actionList'
+    const ACTION_LIST_SELECTOR = '.' + ACTION_LIST_CLASS
+    const actionList = tweet.querySelector(ACTION_LIST_SELECTOR)
+    console.log('actionList')
+    if (!actionList) {
+        console.error('addClickableFishyActionToTweet actionList for ', tweet, ' could not be found')
+        return
+    }
+    console.log('addClickableFishyActionToTweet START actionList count ', actionList.childElementCount)
+    // ProfileTweet-actionList
     /** remove previously made (if it exists) action to tweet */
     /*
     this function may have previously been called for this tweet
     meaning the fishy action dom may already exist . . .
     if that is the case we should delete the current fishy dom . . so that we don't get w+ icons at the button action menu
     */
-    const TWITTER_ACTION_CLASS = 'ProfileTweet-action'
-    const FISHY_ACTION_CLASS = TWITTER_ACTION_CLASS + '--fishy'
-    const previouslyMadeFishyActionDom = tweet.querySelector('.' + FISHY_ACTION_CLASS)
-    tweet.removeChild(previouslyMadeFishyActionDom)
+    const ACTION_CLASS = 'ProfileTweet-action'
+    const FISHY_ACTION_CLASS = ACTION_CLASS + '--fishy'
+    // const previouslyMadeFishyActionDom = tweet.querySelector('.' + FISHY_ACTION_CLASS)
+    // tweet.removeChild(previouslyMadeFishyActionDom)
 
     /** add FishyAction to tweet */
     const fishyActionDom = document.createElement('div')
-    fishyActionDom.classList.add(TWITTER_ACTION_CLASS)
+    fishyActionDom.classList.add(ACTION_CLASS)
     fishyActionDom.classList.add(FISHY_ACTION_CLASS)
     fishyActionDom.appendChild(button)
     // TODO: somehow make onclick on button display the overlay
     actionList.appendChild(fishyActionDom)
+    console.log('addClickableFishyActionToTweet END actionList count ', actionList.childElementCount)
 }

@@ -2,6 +2,13 @@
  * Place your custom CSS styles here.
  **/
 
+.Icon--fishy:before {
+  /*content: '\f170';*/
+  /*content: '\f128031';*/
+   content: '\1f41f';
+  /*content: '&#128031;';*/
+
+}
 .probably-a-bot {
   -webkit-filter: blur(10px);
 }
