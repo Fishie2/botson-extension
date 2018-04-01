@@ -45,19 +45,18 @@ function createHighlightedTweetSection2(message){
 
 
     return queryPromise.then(function(ret){
-
         const div = document.createElement("div");
         const scoreArray = ret.attributeScores.TOXICITY_FAST.spanScores;
-        for(let i=0; i<scoreArray.length; i++){
+        for (let scoreItem of scoreArray){
+            console.log('scoreItem is ', scoreItem)
             const currentSpan = document.createElement("span");
-            currentSpan.innerHTML = message.substring(scoreArray[i].begin, scoreArray[i].end);
-            if(scoreArray[i].score.value > 0.5) {
+            currentSpan.innerHTML = message.substring(scoreItem.begin, scoreItem.end);
+            if (scoreItem.score.value > 0.5) {
                 currentSpan.setAttribute("style","text-decoration: underline;");
             }
             div.appendChild(currentSpan);
         }
         return div;
-
     });
 }
 function createLinkSection2(link) {
@@ -107,6 +106,7 @@ function createLinkSection2(link) {
 function createUserSection2(userId, screen_name){
 
     const section = document.createElement('div');
+    section.classList.add('fishie--userSection')
     let chance = Math.floor(Math.random() * 100);
     const sampleText = document.createTextNode('The percent chance that this user is a bot is ' + chance + '%')
     section.appendChild(sampleText)
@@ -452,6 +452,18 @@ chrome.extension.sendMessage({}, function(response) {
                  fishyActionDom.classList.add(FISHY_ACTION_CLASS)
                  fishyActionDom.appendChild(button)
                  // TODO: somehow make onclick on button display the overlay
+                 overlayContainer.onClick = () => {
+                     console.log("overlayContainer clicked")
+                     hideOverlay(overlayContainer)
+                 }
+                 overlayContent.onClick = () => {
+                     console.log("overlayContent clicked")
+                     hideOverlay(overlayContainer)
+                 }
+                 overlay.onClick = () => {
+                     console.log("overlay clicked")
+                     hideOverlay(overlayContainer)
+                 }
                  fishyActionDom.addEventListener('click', () => {
                      // displayOverlay()
                      // displayOverlay()
@@ -469,12 +481,10 @@ chrome.extension.sendMessage({}, function(response) {
                  overlayContainer.style.display = "block";
              }
 
-
-
-
-
-
-
+             function hideOverlay(overlayContainer) {
+                 console.log('hideOverlay called', overlayContainer)
+                 overlayContainer.style.display = "none";
+             }
 
          }
 

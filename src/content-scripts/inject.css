@@ -2,6 +2,9 @@
  * Place your custom CSS styles here.
  **/
 
+.fishie--userSection {
+    font-size: 20px;
+}
 .Icon--fishy:before {
   /*content: '\f170';*/
   /*content: '\f128031';*/
